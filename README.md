@@ -1,2 +1,2 @@
 # HJxB
-Value Function Learning for Model-based Continuous Control Systems
+Value Function Learning for Model-based Continuous Control Systems in JAX
