@@ -2,10 +2,9 @@ from environment import System, Env
 
 import gym
 
+import jax
 from jax import numpy as jnp
 from jax import jit
-
-import numpy as np
 
 from functools import partial
 
@@ -56,24 +55,15 @@ class PendulumEnv(Env):
          dtype=jnp.float32
       )
       self.observation_space = gym.spaces.Box(
-         low=np.array([-np.inf, -self.sys.max_speed]),
-         high=np.array([np.inf, self.sys.max_speed]),
+         low=jnp.array([-jnp.pi, -self.sys.max_speed]),
+         high=jnp.array([jnp.pi, self.sys.max_speed]),
          shape=(2, ),
          dtype=jnp.float32,
       )
       self.viewer = None
       self.seed()
 
-   # remaining methods are shameless copy from openai gym
-   def seed(self, seed=None):
-      self.np_random, seed = gym.utils.seeding.np_random(seed)
-      return [seed]
-
-   def reset(self):
-      high = np.array([np.pi, 1])
-      self.state = self.np_random.uniform(low=-high, high=high)
-      return self.state
-
+   # render methods are shameless copied from openai gym
    def render(self, mode='human'):
       if self.viewer is None:
          from gym.envs.classic_control import rendering
@@ -87,10 +77,10 @@ class PendulumEnv(Env):
          axle = rendering.make_circle(.05)
          axle.set_color(0, 0, 0)
          self.viewer.add_geom(axle)
-      self.pole_transform.set_rotation(self.state[0] + np.pi / 2)
+      self.pole_transform.set_rotation(self.state[0] + jnp.pi / 2)
       return self.viewer.render(return_rgb_array=mode == 'rgb_array')
 
-      def close(self):
-         if self.viewer:
-            self.viewer.close()
-            self.viewer = None
+   def close(self):
+      if self.viewer:
+         self.viewer.close()
+         self.viewer = None
