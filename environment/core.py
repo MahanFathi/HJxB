@@ -16,20 +16,30 @@ class System(object):
     """Base Class for Continuous Control Systems.
     """
     def f(self,
-          x: jnp.array,
-          u: Union[float, jnp.ndarray],
+          x: jnp.array, # could be a batch of states and actions
+          u: jnp.ndarray,
           ) -> jnp.ndarray:
         """Dynamics of the System
         .. math::
             \dot{x} = f(x, u)
+        .input:
+            x: (N, state_dim)
+            u: (N, act_dim)
+        .output:
+            x_dot: (N, state_dim)
         """
         raise NotImplementedError
 
     def g(self,
           x: jnp.array,
-          u: Union[float, jnp.ndarray],
+          u: jnp.ndarray,
           ) -> jnp.ndarray:
         """Continuous Cost of the System
+        .input:
+            x: (N, state_dim)
+            u: (N, act_dim)
+        .output:
+            cost: (N, )
         """
         raise NotImplementedError
 

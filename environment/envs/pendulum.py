@@ -22,7 +22,7 @@ class PendulumSys(System):
 
    @partial(jit, static_argnums=(0,))
    def f(self, x, u):
-      th, thdot = x
+      th, thdot = jnp.split(x, 2, -1)
 
       gravity = self.gravity
       m = self.mass
@@ -31,13 +31,13 @@ class PendulumSys(System):
       u = jnp.clip(u, -self.max_torque, self.max_torque)[0]
       thdotdot = (-3 * gravity / (2 * l) * jnp.sin(th + jnp.pi) + 3. / (m * l ** 2) * u)
       clipped_thdot = jnp.clip(thdot, -self.max_speed, self.max_speed) # any good in doing this?
-      return jnp.array([clipped_thdot, thdotdot])
+      return jnp.hstack([clipped_thdot, thdotdot])
 
    @partial(jit, static_argnums=(0,))
    def g(self, x, u):
-      th, thdot = x
+      th, thdot = jnp.split(x, 2, -1)
       cost = angle_normalize(th) ** 2 + .1 * thdot ** 2 + .001 * (u ** 2)
-      return cost
+      return jnp.squeeze(cost)
 
 def angle_normalize(x):
    return (jnp.mod((x + jnp.pi), (2 * jnp.pi)) - jnp.pi)
