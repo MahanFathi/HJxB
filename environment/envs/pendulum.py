@@ -61,7 +61,6 @@ class PendulumEnv(Env):
          dtype=jnp.float32,
       )
       self.viewer = None
-      self.seed()
 
    # render methods are shameless copied from openai gym
    def render(self, mode='human'):
