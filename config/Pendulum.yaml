@@ -1,0 +1,6 @@
+VALUE_NET:
+    LR: 0.001
+    FEATURES:
+        - 32
+        - 16
+        - 8
