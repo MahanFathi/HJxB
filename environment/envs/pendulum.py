@@ -14,6 +14,7 @@ import os
 class PendulumSys(System):
 
    def __init__(self, gravity=9.81):
+      super().__init__()
       self.max_speed = 8
       self.max_torque = 2.
       self.gravity = gravity
@@ -35,8 +36,9 @@ class PendulumSys(System):
 
    @partial(jit, static_argnums=(0,))
    def g(self, x, u):
+      R = jnp.array([[.001]])
       th, thdot = jnp.split(x, 2, -1)
-      cost = angle_normalize(th) ** 2 + .1 * thdot ** 2 + .001 * (u ** 2)
+      cost = angle_normalize(th) ** 2 + .1 * thdot ** 2 + u @ R @ u.T
       return jnp.squeeze(cost)
 
 def angle_normalize(x):
