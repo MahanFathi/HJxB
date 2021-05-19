@@ -14,6 +14,14 @@ _C.VALUE_NET = CN()
 _C.VALUE_NET.FEATURES = [32, 16, 8]
 _C.VALUE_NET.LR = 1e-3
 
+# ---------------------------------------------------------------------------- #
+# TRAIN
+# ---------------------------------------------------------------------------- #
+_C.TRAIN = CN()
+_C.TRAIN.DATASET_SIZE = 1024
+_C.TRAIN.BATCH_SIZE = 64
+
+
 
 def get_cfg_defaults():
     """Get a yacs CfgNode object with default values for my_project."""
