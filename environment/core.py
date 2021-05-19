@@ -21,7 +21,7 @@ class System(object):
 
         jac_f(x: (N, obs_dim), u: (N, act_dim)) -> (N, obs_dim, obs_dim), (N, obs_dim, act_dim)
         grad_g(x: (N, obs_dim), u: (N, act_dim)) -> (N, obs_dim), (N, act_dim)
-        hess_g_u(x: (N, obs_dim), u: (N, act_dim)) -> (N, 1, act_dim)
+        hess_g_u(x: (N, obs_dim), u: (N, act_dim)) -> (N, act_dim, act_dim)
         """
         self.jac_f = self._make_jac_f_fn()
         self.grad_g = self._make_grad_g_fn()
