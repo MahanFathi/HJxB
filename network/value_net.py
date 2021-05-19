@@ -15,7 +15,7 @@ class ValueNet(object):
                 ):
         self.nn = DenseNet(cfg.VALUE_NET.FEATURES + [1])
 
-    # TODO(mahan): is this the fastest way to do this?
+    # TODO(mahan): is this the best way to do this?
     def pjpx_fn(self, x, params):
         """Calculate the partial derivative of J wrt x for a batch observations
         .. math::
@@ -23,9 +23,9 @@ class ValueNet(object):
         .input:
             x: (N, state_dim)
         .output:
-            pjpx: (N, state_dim)
+            pjpx: (N, 1, state_dim)
         """
-        single_pjpx_fn = jax.grad(lambda x: jnp.squeeze(self.nn.apply(params, x)))
+        single_pjpx_fn = jax.jacfwd(lambda x: self.nn.apply(params, x))
         batch_pjpx_fn = jax.vmap(single_pjpx_fn)
         return batch_pjpx_fn(x)
 
