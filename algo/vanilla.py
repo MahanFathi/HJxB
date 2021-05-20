@@ -22,5 +22,10 @@ class VanillaCFVI(BaseAlgo):
         self.batch_size = cfg.TRAIN.BATCH_SIZE
 
     def gather_dataset(self, ):
-        return (jnp.ones((self.dataset_size, self.env.observation_space.shape[0])), jnp.ones((self.dataset_size, 1)))
-
+        x_dataset = self.env.sample_state(self.dataset_size)
+        u_star_dataset = self.get_optimal_u(x_dataset)
+        x_next_dataset = self.env.step1_batch_fn(x_dataset, u_star_dataset)
+        j_next_dataset = self.value_net.nn.apply(self.optimizer.target, x_next_dataset)
+        g_dataset = self.sys.g(x_dataset, u_star_dataset)
+        j_dataset = g_dataset + j_next_dataset # TODO(mahan): add discount factor maybe?
+        return x_dataset, j_dataset
