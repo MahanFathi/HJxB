@@ -6,8 +6,6 @@ import jax
 from jax import jit, numpy as jnp
 from yacs.config import CfgNode
 
-from functools import partial
-
 
 class VanillaCFVI(BaseAlgo):
     """Continuous Fitted Value Iteration"""

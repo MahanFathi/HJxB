@@ -1,6 +1,14 @@
+ENV:
+  ENV_NAME: "PendulumEnv"
+  TIMESTEP: 0.05
+
 VALUE_NET:
     LR: 0.001
     FEATURES:
         - 32
         - 16
         - 8
+TRAIN:
+  EPOCHS: 256
+  DATASET_SIZE: 1024
+  BATCH_SIZE: 64

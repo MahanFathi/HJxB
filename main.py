@@ -1,7 +1,7 @@
 from config.defaults import get_cfg_defaults
 from algo.vanilla import VanillaCFVI
 from network import ValueNet
-from environment import PendulumEnv
+from environment import make_env
 
 import jax
 
@@ -32,10 +32,10 @@ def main():
     cfg.merge_from_list(args.opts)
     cfg.freeze()
 
-    env = PendulumEnv()
-    vn = ValueNet(cfg)
-    algo = VanillaCFVI(cfg, env, vn)
-    algo.train(10)
+    env = make_env(cfg)
+    value_net = ValueNet(cfg)
+    algo = VanillaCFVI(cfg, env, value_net)
+    algo.train(cfg.TRAIN.EPOCHS)
 
 
 if __name__ == '__main__':
