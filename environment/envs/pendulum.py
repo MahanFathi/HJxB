@@ -47,7 +47,7 @@ def angle_normalize(x):
 
 class PendulumEnv(Env):
    def __init__(self, ):
-      super(PendulumEnv, self).__init__(
+      super().__init__(
          sys=PendulumSys(), h=0.05,
       )
       self.action_space = gym.spaces.Box(

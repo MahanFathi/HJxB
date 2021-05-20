@@ -84,6 +84,7 @@ class Env(gym.Env):
         self.h = h
         self.integration_order = integration_order
         self.seed()
+        self.step1_batch_fn = self._make_step1_batch_fn()
 
     def step1(self,
              x: jnp.array,
@@ -92,6 +93,9 @@ class Env(gym.Env):
         """Take 1 step
         """
         return self.stepn(x, [u] , 1)[0]
+
+    def _make_step1_batch_fn(self, ):
+        return jit(jax.vmap(lambda x, u: self.step1(x, u)))
 
     def stepn(self,
              x: jnp.array,
