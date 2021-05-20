@@ -1,9 +1,17 @@
-"""Vanilla HJB Update"""
 from .base import BaseAlgo
+from environment import Env
+from network import ValueNet
 
 import jax
+from jax import jit, numpy as jnp
+from yacs.config import CfgNode
 
-def VanillaCFVI(BaseAlgo):
+from functools import partial
+
+
+class VanillaCFVI(BaseAlgo):
+    """Continuous Fitted Value Iteration"""
+
     def __init__(self,
                  cfg: CfgNode,
                  env: Env,
@@ -13,21 +21,6 @@ def VanillaCFVI(BaseAlgo):
         self.dataset_size = cfg.TRAIN.DATASET_SIZE
         self.batch_size = cfg.TRAIN.BATCH_SIZE
 
-    def train(self, epochs: int):
-        """Train the thing
-        epochs: visitation times for the dataset
-        """
-        for epoch in range(epochs):
-            x_dataset, j_dataset = self.gather_dataset()
-            rng, input_rng = jax.random.split(rng)
-            self.train_epoch(x_dataset, j_dataset, input_rng)
-
     def gather_dataset(self, ):
+        return (jnp.ones((self.dataset_size, self.env.observation_space.shape[0])), jnp.ones((self.dataset_size, 1)))
 
-    def train_epoch(self,
-                    x_dataset: jnp.ndarray,
-                    j_dataset: jnp.ndarray,
-                    rng,
-                    ):
-
-    def train_step(self, ):

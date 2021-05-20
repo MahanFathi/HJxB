@@ -4,8 +4,10 @@ from network import ValueNet
 from flax import linen as nn, optim
 from yacs.config import CfgNode
 
+import jax
 from jax import numpy as jnp, jit, vmap
 from functools import partial
+
 
 class BaseAlgo(object):
     def __init__(self,
@@ -13,7 +15,6 @@ class BaseAlgo(object):
                  env: Env,
                  value_net: ValueNet,
                  ):
-
         self.cfg = cfg
         self.env = env
         self.sys = env.sys
@@ -33,10 +34,11 @@ class BaseAlgo(object):
             R_inv = jnp.linalg.inv(R)
             u_star = - 0.5 * R_inv @ f2.T @ pjpx.T
             return jnp.squeeze(u_star, axis=-1)
+
         return u_star_solver_fn
 
     def get_optimal_u(self,
-                      x_batch: jnp.ndarray, # (N, obs_dim)
+                      x_batch: jnp.ndarray,  # (N, obs_dim)
                       ):
         """Returns the optimal action wrt J* at hand
         .input:
@@ -52,4 +54,45 @@ class BaseAlgo(object):
         u_star = self.u_star_solver_fn(R, f2, pjpx)
         return u_star
 
-# def loss(self, params):
+    def train(self, epochs: int):
+        """Train the thing
+        epochs: visitation times for the dataset
+        """
+        rng = jax.random.PRNGKey(0)
+        for epoch in range(epochs):
+            x_dataset, j_dataset = self.gather_dataset()
+            rng, input_rng = jax.random.split(rng)
+            self.train_epoch(x_dataset, j_dataset, input_rng)
+
+    def train_epoch(self,
+                    x_dataset: jnp.ndarray,
+                    j_dataset: jnp.ndarray,
+                    rng,
+                    ):
+        """Trains an epoch
+        """
+        steps_per_epoch = self.dataset_size // self.batch_size
+        perms = jax.random.permutation(rng, self.dataset_size)
+        perms = perms[:steps_per_epoch * self.batch_size]  # skip incomplete batch
+        perms = perms.reshape((steps_per_epoch, self.batch_size))
+        for perm in perms:  # represents a batch
+            x_batch = x_dataset[perm]
+            j_batch = j_dataset[perm]
+            loss, grad = self.loss_and_grad(x_batch, j_batch, self.optimizer.target)
+            self.optimizer = self.optimizer.apply_gradient(grad)
+        print(loss)
+
+    @partial(jit, static_argnums=(0,))
+    def loss_and_grad(self, x_batch, j_batch, params):
+        """Trains a batch
+        """
+
+        def loss_fn(params):
+            predictions = self.value_net.nn.apply(params, x_batch)
+            loss = jnp.mean(jnp.square(predictions - j_batch))
+            return loss
+
+        grad_fn = jax.value_and_grad(loss_fn)
+        loss, grad = grad_fn(params)
+        return loss, grad
+

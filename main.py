@@ -1,5 +1,5 @@
 from config.defaults import get_cfg_defaults
-from algo.base import BaseAlgo
+from algo.vanilla import VanillaCFVI
 from network import ValueNet
 from environment import PendulumEnv
 
@@ -34,9 +34,8 @@ def main():
 
     env = PendulumEnv()
     vn = ValueNet(cfg)
-    algo = BaseAlgo(cfg, env, vn)
-    x = env.sample_state(10)
-    print(algo.get_optimal_u(x).shape)
+    algo = VanillaCFVI(cfg, env, vn)
+    algo.train(10)
 
 
 if __name__ == '__main__':
