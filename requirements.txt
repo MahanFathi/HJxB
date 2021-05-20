@@ -1,0 +1,8 @@
+numpy
+jax
+jaxlib
+tensorflow
+tensorboard
+yacs
+gym
+flax==0.3.3
