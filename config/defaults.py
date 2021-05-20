@@ -28,6 +28,12 @@ _C.TRAIN.EPOCHS = 256
 _C.TRAIN.DATASET_SIZE = 1024
 _C.TRAIN.BATCH_SIZE = 64
 
+# ---------------------------------------------------------------------------- #
+# LOGGING
+# ---------------------------------------------------------------------------- #
+_C.LOG = CN()
+_C.LOG.LOG_DIR = "./logs"
+
 
 def get_cfg_defaults():
     """Get a yacs CfgNode object with default values for my_project."""
