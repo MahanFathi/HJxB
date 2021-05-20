@@ -27,12 +27,14 @@ _C.TRAIN = CN()
 _C.TRAIN.EPOCHS = 256
 _C.TRAIN.DATASET_SIZE = 1024
 _C.TRAIN.BATCH_SIZE = 64
+_C.TRAIN.GAMMA = 0.9
 
 # ---------------------------------------------------------------------------- #
 # LOGGING
 # ---------------------------------------------------------------------------- #
 _C.LOG = CN()
 _C.LOG.LOG_DIR = "./logs"
+_C.LOG.LOG_EVERY_N_EPOCHS = 100
 
 
 def get_cfg_defaults():

@@ -87,7 +87,8 @@ class BaseAlgo(object):
             loss, grad = self.loss_and_grad(x_batch, j_batch, self.optimizer.target)
             self.optimizer = self.optimizer.apply_gradient(grad)
             loss_log.append(loss)
-        self.summary_writer.scalar("train_loss", np.mean(loss_log), epoch)
+        if epoch % self.cfg.LOG.LOG_EVERY_N_EPOCHS == 0:
+            self.summary_writer.scalar("train_loss", np.mean(loss_log), epoch)
         print(loss)
 
     @partial(jit, static_argnums=(0,))

@@ -3,15 +3,18 @@ ENV:
   TIMESTEP: 0.05
 
 VALUE_NET:
-    LR: 0.001
+    LR: 0.00001
     FEATURES:
-        - 32
+        - 16
+        - 16
+        - 16
         - 16
         - 8
 TRAIN:
-  EPOCHS: 256
-  DATASET_SIZE: 1024
-  BATCH_SIZE: 64
+  EPOCHS: 100000
+  DATASET_SIZE: 512
+  BATCH_SIZE: 128
 
 LOG:
   LOG_DIR: "./logs"
+  LOG_EVERY_N_EPOCHS: 100
