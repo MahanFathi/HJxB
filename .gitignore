@@ -138,4 +138,4 @@ dmypy.json
 cython_debug/
 
 # Logs dir
-./logs
+logs/
