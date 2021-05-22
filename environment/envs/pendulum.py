@@ -21,7 +21,6 @@ class PendulumSys(System):
       self.mass = 1.
       self.lenght = 1.
 
-   @partial(jit, static_argnums=(0,))
    def f(self, x, u):
       th, thdot = jnp.split(x, 2, -1)
 
@@ -34,7 +33,6 @@ class PendulumSys(System):
       clipped_thdot = jnp.clip(thdot, -self.max_speed, self.max_speed) # any good in doing this?
       return jnp.hstack([clipped_thdot, thdotdot])
 
-   @partial(jit, static_argnums=(0,))
    def g(self, x, u):
       R = jnp.array([[.001]])
       th, thdot = jnp.split(x, 2, -1)
