@@ -9,7 +9,7 @@ VALUE_NET:
         - 16
         - 8
 TRAIN:
-  EPOCHS: 100000
+  EPOCHS: 10000
   DATASET_SIZE: 1024
   BATCH_SIZE: 128
 
