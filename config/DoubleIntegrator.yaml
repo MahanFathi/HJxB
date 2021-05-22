@@ -1,0 +1,18 @@
+ENV:
+  ENV_NAME: "DoubleIntegratorEnv"
+  TIMESTEP: 0.05
+
+VALUE_NET:
+    LR: 0.0001
+    FEATURES:
+        - 16
+        - 16
+        - 8
+TRAIN:
+  EPOCHS: 100000
+  DATASET_SIZE: 1024
+  BATCH_SIZE: 128
+
+LOG:
+  LOG_DIR: "./logs"
+  LOG_EVERY_N_EPOCHS: 10
