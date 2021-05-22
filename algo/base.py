@@ -52,8 +52,8 @@ class BaseAlgo(object):
         """
         # TODO(mahan): get rid of the need for dummy_u
         dummy_u = jnp.zeros((x_batch.shape[0], self.env.action_space.shape[0]))
-        R = 0.5 * self.sys.hess_g_u(x_batch, dummy_u)
-        f2 = self.sys.jac_f(x_batch, dummy_u)[1]
+        R = 0.5 * self.sys.hess_g_u_fn(x_batch, dummy_u)
+        f2 = self.sys.jac_f_fn(x_batch, dummy_u)[1]
         pjpx = self.value_net.pjpx_fn(x_batch, self.vparams)
         u_star = self.u_star_solver_fn(R, f2, pjpx)
         return u_star

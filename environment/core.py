@@ -9,7 +9,7 @@ from typing import (
 )
 
 import jax
-from jax import jit, numpy as jnp
+from jax import jit, vmap, numpy as jnp
 import gym
 
 class System(object):
@@ -19,13 +19,17 @@ class System(object):
         """Make auxiliary diff functions
         These fns are vmap'd, i.e. they take in batch.
 
-        jac_f(x: (N, obs_dim), u: (N, act_dim)) -> (N, obs_dim, obs_dim), (N, obs_dim, act_dim)
-        grad_g(x: (N, obs_dim), u: (N, act_dim)) -> (N, obs_dim), (N, act_dim)
-        hess_g_u(x: (N, obs_dim), u: (N, act_dim)) -> (N, act_dim, act_dim)
+        f_fn(x: (N, obs_dim), u: (N, act_dim)) -> (N, obs_dim)
+        g_fn(x: (N, obs_dim), u: (N, act_dim)) -> (N, )
+        jac_f_fn(x: (N, obs_dim), u: (N, act_dim)) -> (N, obs_dim, obs_dim), (N, obs_dim, act_dim)
+        grad_g_fn(x: (N, obs_dim), u: (N, act_dim)) -> (N, obs_dim), (N, act_dim)
+        hess_g_u_fn(x: (N, obs_dim), u: (N, act_dim)) -> (N, act_dim, act_dim)
         """
-        self.jac_f = self._make_jac_f_fn()
-        self.grad_g = self._make_grad_g_fn()
-        self.hess_g_u = self._make_hess_g_u_fun()
+        self.f_fn = jit(vmap(self.f))
+        self.g_fn = jit(vmap(self.g))
+        self.jac_f_fn = self._make_jac_f_fn()
+        self.grad_g_fn = self._make_grad_g_fn()
+        self.hess_g_u_fn = self._make_hess_g_u_fun()
 
     def f(self,
           x: jnp.array, # could be a batch of states and actions
@@ -35,10 +39,10 @@ class System(object):
         .. math::
             \dot{x} = f(x, u)
         .input:
-            x: (N, state_dim)
-            u: (N, act_dim)
+            x: (state_dim, )
+            u: (act_dim, )
         .output:
-            x_dot: (N, state_dim)
+            x_dot: (state_dim, )
         """
         raise NotImplementedError
 
@@ -48,27 +52,27 @@ class System(object):
           ) -> jnp.ndarray:
         """Continuous Cost of the System
         .input:
-            x: (N, state_dim)
-            u: (N, act_dim)
+            x: (state_dim, )
+            u: (act_dim, )
         .output:
-            cost: (N, )
+            cost: ()
         """
         raise NotImplementedError
 
     def _make_jac_f_fn(self, ):
         single_jac_f_fn = jax.jacfwd(self.f, argnums=[0, 1])
-        batch_jac_f_fn = jit(jax.vmap(single_jac_f_fn))
+        batch_jac_f_fn = jit(vmap(single_jac_f_fn))
         return batch_jac_f_fn
 
     def _make_grad_g_fn(self, ):
         single_grad_g_fn = jax.grad(self.g, argnums=[0, 1])
-        batch_grad_g_fn = jit(jax.vmap(single_grad_g_fn))
+        batch_grad_g_fn = jit(vmap(single_grad_g_fn))
         return batch_grad_g_fn
 
     def _make_hess_g_u_fun(self, ):
         single_grad_g_u_fn = jax.grad(self.g, argnums=1)
         single_hess_g_u_fn = jax.jacfwd(single_grad_g_u_fn, argnums=1)
-        batch_hess_g_u_fn = jit(jax.vmap(single_hess_g_u_fn))
+        batch_hess_g_u_fn = jit(vmap(single_hess_g_u_fn))
         return batch_hess_g_u_fn
 
 
@@ -95,7 +99,7 @@ class Env(gym.Env):
         return self.stepn(x, [u] , 1)[0]
 
     def _make_step1_batch_fn(self, ):
-        return jit(jax.vmap(lambda x, u: self.step1(x, u)))
+        return jit(vmap(self.step1))
 
     def stepn(self,
              x: jnp.array,
