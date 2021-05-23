@@ -31,7 +31,7 @@ def main():
 
     env = make_env(cfg)
     algo = make_algo(cfg, env)
-    algo.train(cfg.TRAIN.EPOCHS)
+    algo.train(cfg.TRAIN.ITERATIONS)
 
 
 if __name__ == '__main__':

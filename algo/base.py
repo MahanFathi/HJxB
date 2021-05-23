@@ -24,6 +24,10 @@ class BaseAlgo(object):
         self.u_star_solver_fn = self._make_u_star_solver()
         self.summary_writer = logger.get_summary_writer(cfg)
 
+        self.dataset_size = cfg.TRAIN.DATASET_SIZE
+        self.batch_size = cfg.TRAIN.BATCH_SIZE
+        self.gamma = cfg.TRAIN.GAMMA
+
     def _init_value_net_and_optimizer(self, ):
         self.value_net = ValueNet(self.cfg)
         sample_x = self.env.sample_state(1)
@@ -57,13 +61,34 @@ class BaseAlgo(object):
         u_star = self.u_star_solver_fn(R, f2, pjpx)
         return u_star
 
+    def get_target_j(self,
+                     x_batch: jnp.ndarray,
+                     ):
+        """Returns the target J*
+        .input:
+            x: (N, state_dim)
+        .output:
+            j: (N, 1)
+        """
+        u_star_batch = self.get_optimal_u(x_batch)
+        x_next_batch = self.env.step1_batch_fn(x_batch, u_star_batch)
+        j_next_batch = self.value_net.nn.apply(self.optimizer.target, x_next_batch)
+        g_batch = self.sys.g_fn(x_batch, u_star_batch) * self.env.h # TODO(mahan) a bit ugly
+        j_batch = g_batch + self.gamma * j_next_batch
+        return j_batch
+
+    def get_x_train(self, ):
+        """The datapoints for which the dataset is built"""
+        raise NotImplementedError
+
     def train(self, epochs: int):
         """Train the thing
         epochs: visitation times for the dataset
         """
         rng = jax.random.PRNGKey(0)
         for epoch in range(epochs):
-            x_dataset, j_dataset = self.gather_dataset()
+            x_dataset = self.get_x_train()
+            j_dataset = self.get_target_j(x_dataset)
             rng, input_rng = jax.random.split(rng)
             self.train_epoch(epoch, x_dataset, j_dataset, input_rng)
 

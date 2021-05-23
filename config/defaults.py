@@ -25,10 +25,11 @@ _C.VALUE_NET.LR = 1e-3
 # ---------------------------------------------------------------------------- #
 _C.TRAIN = CN()
 _C.TRAIN.ALGO_NAME = "DPcFVI"
-_C.TRAIN.EPOCHS = 256
+_C.TRAIN.ITERATIONS = 256
 _C.TRAIN.DATASET_SIZE = 1024
 _C.TRAIN.BATCH_SIZE = 64
 _C.TRAIN.GAMMA = 0.9
+_C.TRAIN.BUFFER_SIZE = 8192
 
 # ---------------------------------------------------------------------------- #
 # LOGGING
