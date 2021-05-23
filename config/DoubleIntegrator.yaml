@@ -9,6 +9,7 @@ VALUE_NET:
         - 16
         - 8
 TRAIN:
+  ALGO_NAME: "DPcFVI"
   EPOCHS: 10000
   DATASET_SIZE: 1024
   BATCH_SIZE: 128

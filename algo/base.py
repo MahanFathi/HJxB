@@ -16,17 +16,16 @@ class BaseAlgo(object):
     def __init__(self,
                  cfg: CfgNode,
                  env: Env,
-                 value_net: ValueNet,
                  ):
         self.cfg = cfg
         self.env = env
         self.sys = env.sys
-        self.value_net = value_net
         self._init_value_net_and_optimizer()
         self.u_star_solver_fn = self._make_u_star_solver()
         self.summary_writer = logger.get_summary_writer(cfg)
 
     def _init_value_net_and_optimizer(self, ):
+        self.value_net = ValueNet(self.cfg)
         sample_x = self.env.sample_state(1)
         self.vparams = self.value_net.nn.init(self.env.PRNGkey, sample_x)
         self.optimizer = optim.Adam(learning_rate=self.cfg.VALUE_NET.LR).create(self.vparams)

@@ -1,9 +1,6 @@
 from config.defaults import get_cfg_defaults
-from algo.vanilla import VanillaCFVI
-from network import ValueNet
 from environment import make_env
-
-import jax
+from algo import make_algo
 
 import argparse
 
@@ -33,8 +30,7 @@ def main():
     cfg.freeze()
 
     env = make_env(cfg)
-    value_net = ValueNet(cfg)
-    algo = VanillaCFVI(cfg, env, value_net)
+    algo = make_algo(cfg, env)
     algo.train(cfg.TRAIN.EPOCHS)
 
 
