@@ -36,7 +36,7 @@ class PendulumSys(System):
    def g(self, x, u):
       R = jnp.array([[.001]])
       th, thdot = jnp.split(x, 2, -1)
-      cost = angle_normalize(th) ** 2 + .1 * thdot ** 2 + u @ R @ u.T
+      cost = angle_normalize(th) ** 2 + .1 * thdot ** 2 + u.T @ R @ u
       return jnp.squeeze(cost)
 
 def angle_normalize(x):
@@ -62,7 +62,7 @@ class PendulumEnv(Env):
       )
       self.viewer = None
 
-   # render methods are shameless copied from openai gym
+   # shameless copy from openai gym
    def render(self, mode='human'):
       if self.viewer is None:
          from gym.envs.classic_control import rendering
