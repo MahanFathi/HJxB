@@ -15,6 +15,7 @@ class DPcFVI(BaseAlgo):
                  ):
         super().__init__(cfg, env)
 
-    def get_x_train(self, ):
+    def get_x_train(self, N=None):
+        N = N or self.dataset_size
         x_dataset = self.env.sample_state(self.dataset_size)
         return x_dataset

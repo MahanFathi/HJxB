@@ -77,7 +77,7 @@ class BaseAlgo(object):
         j_batch = g_batch + self.gamma * j_next_batch
         return j_batch
 
-    def get_x_train(self, ):
+    def get_x_train(self, N=None):
         """The datapoints for which the dataset is built"""
         raise NotImplementedError
 

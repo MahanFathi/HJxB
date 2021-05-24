@@ -86,9 +86,14 @@ class Env(gym.Env):
                  ):
         self.sys = sys
         self.h = h
+        self.T = None # (float: the horizon)
         self.integration_order = integration_order
         self.seed()
         self.step1_batch_fn = self._make_step1_batch_fn()
+
+    @property
+    def timesteps(self, ):
+        return self.T // self.h
 
     def step1(self,
              x: jnp.array,

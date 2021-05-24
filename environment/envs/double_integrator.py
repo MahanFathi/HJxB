@@ -40,6 +40,7 @@ class DoubleIntegratorEnv(Env):
         super().__init__(
             DoubleIntegratorSys(), h=h,
         )
+        self.T = 3.
         self.action_space = gym.spaces.Box(
             low=-self.sys.max_force,
             high=self.sys.max_force,

@@ -30,6 +30,8 @@ _C.TRAIN.DATASET_SIZE = 1024
 _C.TRAIN.BATCH_SIZE = 64
 _C.TRAIN.GAMMA = 0.9
 _C.TRAIN.BUFFER_SIZE = 8192
+_C.TRAIN.N_PARALLEL_ROLLOUTS = 32
+_C.TRAIN.GREEDY_EPSILON = 0.9 # act greedy 90% of the times
 
 # ---------------------------------------------------------------------------- #
 # LOGGING
