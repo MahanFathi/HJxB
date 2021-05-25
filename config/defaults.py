@@ -39,6 +39,7 @@ _C.TRAIN.GREEDY_EPSILON = 0.9 # act greedy 90% of the times
 _C.LOG = CN()
 _C.LOG.LOG_DIR = "./logs"
 _C.LOG.LOG_EVERY_N_EPOCHS = 100
+_C.LOG.EVAL_EVERY_N_EPOCHS = 100
 
 
 def get_cfg_defaults():

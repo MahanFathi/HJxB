@@ -111,9 +111,24 @@ class BaseAlgo(object):
             loss, grad = self.loss_and_grad(x_batch, j_batch, self.optimizer.target)
             self.optimizer = self.optimizer.apply_gradient(grad)
             loss_log.append(loss)
+
+        # report to tb
         if epoch % self.cfg.LOG.LOG_EVERY_N_EPOCHS == 0:
-            self.summary_writer.scalar("train_loss", np.mean(loss_log), epoch)
-        print(loss)
+            self.summary_writer.scalar(
+                "train_loss",
+                np.mean(loss_log),
+                epoch,
+            )
+
+        # evaluate policy
+        if epoch % self.cfg.LOG.EVAL_EVERY_N_EPOCHS == 0:
+            self.summary_writer.scalar(
+                "eval_cost",
+                jnp.mean(self.eval_policy(10)),
+                epoch,
+            )
+
+        print("Epoch mean loss: {}".format(np.mean(loss_log)))
 
     @partial(jit, static_argnums=(0,))
     def loss_and_grad(self, x_batch, j_batch, params):
@@ -129,3 +144,19 @@ class BaseAlgo(object):
         loss, grad = grad_fn(params)
         return loss, grad
 
+    def eval_policy(self, N: int):
+        """ Evaluate policy inferred from J*
+            amont N full rollouts.
+        """
+
+        cost_batch = jnp.zeros((N, ))
+        x_batch = self.env.sample_state(N)
+
+        for t in range(self.env.timesteps):
+            u_star_batch = self.get_optimal_u(x_batch)
+            g_batch = self.sys.g_fn(x_batch, u_star_batch) * self.env.h
+            cost_batch += g_batch
+            x_batch = self.env.step1_batch_fn(x_batch, u_star_batch)
+
+        mean_cost = jnp.mean(cost_batch)
+        return mean_cost

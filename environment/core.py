@@ -93,7 +93,7 @@ class Env(gym.Env):
 
     @property
     def timesteps(self, ):
-        return self.T // self.h
+        return int(self.T // self.h)
 
     def step1(self,
              x: jnp.array,
