@@ -1,4 +1,4 @@
-from .base import BaseAlgo
+from .base import BaseBellman
 from environment import Env
 from utils.buffer import ReplayBuffer
 
@@ -8,7 +8,7 @@ from yacs.config import CfgNode
 import random
 
 
-class RTDPcFVI(BaseAlgo):
+class RTDPcFVI(BaseBellman):
     """Continuous Fitted Value Iteration"""
 
     def __init__(self,
@@ -31,7 +31,7 @@ class RTDPcFVI(BaseAlgo):
 
         self.rng = jax.random.PRNGKey(999) # rip juice
 
-    def get_x_train(self, N: int = None):
+    def _get_x_train(self, N: int = None):
         """
         This method can also be thought of as
         a sub-routine that gets called before

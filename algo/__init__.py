@@ -1,8 +1,8 @@
 from environment import Env
 from yacs.config import CfgNode
 
-from .DPcFVI import DPcFVI
-from .RTDPcFVI import RTDPcFVI
+from .bellman.DPcFVI import DPcFVI
+from .bellman.RTDPcFVI import RTDPcFVI
 
 __all__ = ["DPcFVI", "RTDPcFVI"]
 
