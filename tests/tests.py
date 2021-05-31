@@ -1,6 +1,3 @@
-import os
-os.chdir("..")
-
 import unittest
 
 import jax
