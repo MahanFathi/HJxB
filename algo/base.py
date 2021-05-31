@@ -123,7 +123,7 @@ class BaseAlgo(object):
 
         # evaluate policy
         if epoch % self.cfg.LOG.EVAL_EVERY_N_EPOCHS == 0:
-            mean_cost = self.eval_policy(10)
+            mean_cost = self.eval_policy(self.cfg.LOG.EVAL_ACROSS_N_RUNS)
             print("Env eval cost: {}".format(mean_cost))
             self.summary_writer.scalar(
                 "eval_cost",
