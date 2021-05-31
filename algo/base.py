@@ -73,7 +73,7 @@ class BaseAlgo(object):
         """
         u_star_batch = self.get_optimal_u(x_batch)
         x_next_batch = self.env.step1_batch_fn(x_batch, u_star_batch)
-        j_next_batch = self.value_net.apply(self.optimizer.target, x_next_batch)
+        j_next_batch = self.value_net.apply(self.vparams, x_next_batch)
         g_batch = self.sys.g_fn(x_batch, u_star_batch) * self.env.h # TODO(mahan) a bit ugly
         j_batch = g_batch + self.gamma * j_next_batch
         return j_batch
@@ -130,6 +130,9 @@ class BaseAlgo(object):
                 mean_cost,
                 epoch,
             )
+
+        if epoch % self.cfg.TRAIN.UPDATE_TARGET_NET_EVERY_N_EPOCHS == 0:
+            self.vparams = self.optimizer.target # update target net params
 
         print("Epoch value train loss: {}".format(np.mean(loss_log)))
 

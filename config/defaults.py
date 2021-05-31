@@ -32,6 +32,7 @@ _C.TRAIN.GAMMA = 0.9
 _C.TRAIN.BUFFER_SIZE = 8192
 _C.TRAIN.N_PARALLEL_ROLLOUTS = 32
 _C.TRAIN.GREEDY_EPSILON = 0.9 # act greedy 90% of the times
+_C.TRAIN.UPDATE_TARGET_NET_EVERY_N_EPOCHS = 1
 
 # ---------------------------------------------------------------------------- #
 # LOGGING
@@ -40,6 +41,7 @@ _C.LOG = CN()
 _C.LOG.LOG_DIR = "./logs"
 _C.LOG.LOG_EVERY_N_EPOCHS = 100
 _C.LOG.EVAL_EVERY_N_EPOCHS = 100
+_C.LOG.EVAL_ACROSS_N_RUNS = 10
 
 
 def get_cfg_defaults():
