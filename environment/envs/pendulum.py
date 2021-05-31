@@ -84,3 +84,7 @@ class PendulumEnv(Env):
       if self.viewer:
          self.viewer.close()
          self.viewer = None
+
+   def obs2feat(self, x):
+      th, thdot = jnp.split(x, 2, -1)
+      return jnp.hstack([jnp.cos(th), jnp.sin(th), thdot])

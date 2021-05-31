@@ -29,9 +29,10 @@ class BaseAlgo(object):
         self.gamma = cfg.TRAIN.GAMMA
 
     def _init_value_net_and_optimizer(self, ):
-        self.value_net = ValueNet(self.cfg)
-        sample_x = self.env.sample_state(1)
-        self.vparams = self.value_net.nn.init(self.env.PRNGkey, sample_x)
+        self.value_net = ValueNet(self.cfg, self.env.obs2feat)
+        dummy_x = self.env.sample_state(1)
+        dummy_features = self.env.obs2feat(dummy_x)
+        self.vparams = self.value_net.nn.init(self.env.PRNGkey, dummy_features)
         self.optimizer = optim.Adam(learning_rate=self.cfg.VALUE_NET.LR).create(self.vparams)
 
     def _make_u_star_solver(self, ):
@@ -72,7 +73,7 @@ class BaseAlgo(object):
         """
         u_star_batch = self.get_optimal_u(x_batch)
         x_next_batch = self.env.step1_batch_fn(x_batch, u_star_batch)
-        j_next_batch = self.value_net.nn.apply(self.optimizer.target, x_next_batch)
+        j_next_batch = self.value_net.apply(self.optimizer.target, x_next_batch)
         g_batch = self.sys.g_fn(x_batch, u_star_batch) * self.env.h # TODO(mahan) a bit ugly
         j_batch = g_batch + self.gamma * j_next_batch
         return j_batch
@@ -122,13 +123,15 @@ class BaseAlgo(object):
 
         # evaluate policy
         if epoch % self.cfg.LOG.EVAL_EVERY_N_EPOCHS == 0:
+            mean_cost = self.eval_policy(10)
+            print("Env eval cost: {}".format(mean_cost))
             self.summary_writer.scalar(
                 "eval_cost",
-                jnp.mean(self.eval_policy(10)),
+                mean_cost,
                 epoch,
             )
 
-        print("Epoch mean loss: {}".format(np.mean(loss_log)))
+        print("Epoch value train loss: {}".format(np.mean(loss_log)))
 
     @partial(jit, static_argnums=(0,))
     def loss_and_grad(self, x_batch, j_batch, params):
@@ -136,7 +139,7 @@ class BaseAlgo(object):
         """
 
         def loss_fn(params):
-            predictions = self.value_net.nn.apply(params, x_batch)
+            predictions = self.value_net.apply(params, x_batch)
             loss = jnp.mean(jnp.square(predictions - j_batch))
             return loss
 

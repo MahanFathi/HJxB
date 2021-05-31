@@ -153,3 +153,12 @@ class Env(gym.Env):
     def reset(self):
         self.state = jnp.squeeze(self.sample_state(1))
         return self.state
+
+    def obs2feat(self, x: jnp.ndarray):
+        """Feature extractor
+        .input:
+            x: (N, state_dim)
+        .output:
+            feat: (N, feat_dim)
+        """
+        return x
