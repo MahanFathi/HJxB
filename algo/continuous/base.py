@@ -89,7 +89,7 @@ class BaseContinuous(Base):
 
         print("Epoch value train loss: {}".format(np.mean(loss_log)))
 
-    # @partial(jit, static_argnums=(0,)) # TODO(mahan): self is static?
+    @partial(jit, static_argnums=(0,)) # TODO(mahan): self is static?
     def _loss_and_grad(self,
                        x_batch: jnp.ndarray,
                        params: FrozenDict
