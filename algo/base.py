@@ -130,6 +130,8 @@ class BaseAlgo(object):
                 mean_cost,
                 epoch,
             )
+            if self.cfg.LOG.ANIMATE:
+                self.animate()
 
         if epoch % self.cfg.TRAIN.UPDATE_TARGET_NET_EVERY_N_EPOCHS == 0:
             self.vparams = self.optimizer.target # update target net params
@@ -166,3 +168,11 @@ class BaseAlgo(object):
 
         mean_cost = jnp.mean(cost_batch)
         return mean_cost
+
+    def animate(self, ):
+        self.env.reset()
+        for _ in range(self.env.timesteps):
+            self.env.render()
+            u = self.get_optimal_u(jnp.expand_dims(self.env.state, 0))
+            self.env.step(jnp.squeeze(u, 0)) # take a random action
+        # self.env.close()

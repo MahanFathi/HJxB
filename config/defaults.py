@@ -42,6 +42,7 @@ _C.LOG.LOG_DIR = "./logs"
 _C.LOG.LOG_EVERY_N_EPOCHS = 100
 _C.LOG.EVAL_EVERY_N_EPOCHS = 100
 _C.LOG.EVAL_ACROSS_N_RUNS = 10
+_C.LOG.ANIMATE = True
 
 
 def get_cfg_defaults():

@@ -53,3 +53,30 @@ class DoubleIntegratorEnv(Env):
             shape=(2, ),
             dtype=jnp.float32,
         )
+        self.viewer = None
+
+    def render(self, mode='human'):
+        if self.viewer is None:
+            from gym.envs.classic_control import rendering
+            self.viewer = rendering.Viewer(500, 500)
+            self.viewer.set_bounds(-5., 5., -5., 5.)
+            dot = rendering.make_circle(.1)
+            brick = rendering.make_polygon([
+                [-.2, -.2],
+                [-.2,  .2],
+                [ .2,  .2],
+                [ .2, -.2],
+            ])
+            brick.set_color(.8, .3, .3)
+            dot.set_color(.0, .0, .0)
+            self.transform = rendering.Transform()
+            brick.add_attr(self.transform)
+            self.viewer.add_geom(brick)
+            self.viewer.add_geom(dot)
+        self.transform.set_translation(self.state[0], .0)
+        return self.viewer.render(return_rgb_array=mode == 'rgb_array')
+
+    def close(self):
+        if self.viewer:
+            self.viewer.close()
+            self.viewer = None
