@@ -2,6 +2,7 @@ from algo.base import Base
 from environment import Env
 
 from yacs.config import CfgNode
+from flax.core.frozen_dict import FrozenDict
 
 import jax
 from jax import numpy as jnp, jit, vmap
@@ -11,6 +12,13 @@ from functools import partial
 
 
 class BaseBellman(Base):
+
+    def _get_x_train(self,
+                     N: int = None,
+                     ):
+        """The datapoints for which the dataset is built"""
+        raise NotImplementedError
+
     def __init__(self, cfg: CfgNode, env: Env):
         super().__init__(cfg, env)
 
@@ -30,11 +38,9 @@ class BaseBellman(Base):
         j_batch = g_batch + self.gamma * j_next_batch
         return j_batch
 
-    def _get_x_train(self, N=None):
-        """The datapoints for which the dataset is built"""
-        raise NotImplementedError
-
-    def train(self, epochs: int):
+    def train(self,
+              epochs: int
+              ):
         """ Train the thing
             epochs: visitation times for the dataset
         """
@@ -89,9 +95,13 @@ class BaseBellman(Base):
         print("Epoch value train loss: {}".format(np.mean(loss_log)))
 
     @partial(jit, static_argnums=(0,))
-    def _loss_and_grad(self, x_batch, j_batch, params):
+    def _loss_and_grad(self,
+                       x_batch: jnp.ndarray,
+                       j_batch: jnp.ndarray,
+                       params: FrozenDict
+                       ):
 
-        def loss_fn(params):
+        def loss_fn(params: FrozenDict):
             predictions = self.value_net.apply(params, x_batch)
             loss = jnp.mean(jnp.square(predictions - j_batch))
             return loss

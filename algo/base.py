@@ -3,6 +3,7 @@ from network import ValueNet
 from utils import logger
 
 from flax import linen as nn, optim
+from flax.core.frozen_dict import FrozenDict
 from yacs.config import CfgNode
 
 from jax import numpy as jnp, jit, vmap
@@ -48,6 +49,7 @@ class Base(object):
 
     def get_optimal_u(self,
                       x_batch: jnp.ndarray,  # (N, obs_dim)
+                      params: FrozenDict = None,
                       ):
         """Returns the optimal action wrt J* at hand
         .input:
@@ -55,21 +57,28 @@ class Base(object):
         .output:
             u_star: (N, act_dim)
         """
+        if params is None:
+            params = self.vparams
+
         # TODO(mahan): get rid of the need for dummy_u
         dummy_u = jnp.zeros((x_batch.shape[0], self.env.action_space.shape[0]))
         R = 0.5 * self.sys.hess_g_u_fn(x_batch, dummy_u)
         f2 = self.sys.jac_f_fn(x_batch, dummy_u)[1]
-        pjpx = self.value_net.pjpx_fn(x_batch, self.vparams)
+        pjpx = self.value_net.pjpx_fn(x_batch, params)
         u_star = self.u_star_solver_fn(R, f2, pjpx)
         return u_star
 
-    def train(self, epochs: int):
+    def train(self,
+              epochs: int
+              ):
         """ Train the thing
             epochs: visitation times for the dataset
         """
         raise NotImplementedError
 
-    def eval_policy(self, N: int):
+    def eval_policy(self,
+                    N: int
+                    ):
         """ Evaluate policy inferred from J*
             amont N full rollouts.
         """

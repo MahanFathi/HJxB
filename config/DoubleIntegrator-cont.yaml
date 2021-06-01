@@ -1,0 +1,21 @@
+ENV:
+  ENV_NAME: "DoubleIntegratorEnv"
+  TIMESTEP: 0.05
+
+VALUE_NET:
+    LR: 0.0003
+    FEATURES:
+        - 16
+        - 16
+        - 8
+TRAIN:
+  ALGO_NAME: "DDcFV"
+  ITERATIONS: 10000
+  DATASET_SIZE: 1024
+  BATCH_SIZE: 128
+
+LOG:
+  LOG_DIR: "./logs"
+  LOG_EVERY_N_EPOCHS: 10
+  EVAL_EVERY_N_EPOCHS: 50
+  EVAL_ACROSS_N_RUNS: 100
