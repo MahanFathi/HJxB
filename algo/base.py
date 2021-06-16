@@ -148,7 +148,7 @@ class BaseAlgo(object):
         if epoch % self.cfg.LOG.SAVE_WEIGHTS_EVERY_N_EPOCHS == 0:
             self.save_params(str(epoch))
 
-        print("Epoch value train loss: {}".format(np.mean(loss_log)))
+        print("Epoch {}, J train loss: {}".format(epoch, np.mean(loss_log)))
 
     @partial(jit, static_argnums=(0,))
     def loss_and_grad(self, x_batch, j_batch, params):
