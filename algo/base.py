@@ -39,7 +39,7 @@ class BaseAlgo(object):
         self.value_net = ValueNet(self.cfg, self.env.obs2feat)
         dummy_x = self.env.sample_state(1)
         dummy_features = self.env.obs2feat(dummy_x)
-        self.vparams = self.value_net.nn.init(self.env.PRNGkey, dummy_features)
+        self.vparams = self.value_net.nn.init(jax.random.PRNGKey(666), dummy_features)
         self.optimizer = optim.Adam(learning_rate=self.cfg.VALUE_NET.LR).create(self.vparams)
 
     def _make_u_star_solver(self, ):
@@ -182,6 +182,8 @@ class BaseAlgo(object):
         return mean_cost
 
     def save_params(self, name: str):
+        """ Save value net params
+        """
         logdir = logger.get_logdir_path(self.cfg)
         params_dir = logdir.joinpath("params")
         params_dir.mkdir(exist_ok=True)
@@ -191,9 +193,18 @@ class BaseAlgo(object):
 
         with open(params_file, "wb") as f:
             f.write(param_bytes)
-        f.close()
+
+    def load_params(self, path: str):
+        """ Load value net params
+        """
+        with open(path, "rb") as f:
+            byte_params = f.read()
+        serialization.from_bytes(self.vparams, byte_params)
+        serialization.from_bytes(self.optimizer.target, byte_params)
 
     def animate(self, ):
+        """ Animate
+        """
         self.env.reset()
         for _ in range(self.env.timesteps):
             self.env.render()
