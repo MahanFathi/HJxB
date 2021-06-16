@@ -88,3 +88,8 @@ class PendulumEnv(Env):
    def obs2feat(self, x):
       th, thdot = jnp.split(x, 2, -1)
       return jnp.hstack([jnp.cos(th), jnp.sin(th), thdot])
+
+   def reset(self):
+      # deterministic eval
+      self.state = jnp.array([0., 0.])
+      return self.state

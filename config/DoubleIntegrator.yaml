@@ -19,5 +19,5 @@ LOG:
   LOG_DIR: ./logs
   LOG_EVERY_N_EPOCHS: 10
   EVAL_EVERY_N_EPOCHS: 50
-  EVAL_ACROSS_N_RUNS: 1 # for now DI is deterministic
+  EVAL_ACROSS_N_RUNS: 1 # for deterministic evaluation
   ANIMATE: true
