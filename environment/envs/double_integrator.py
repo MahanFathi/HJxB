@@ -15,20 +15,20 @@ class DoubleIntegratorSys(System):
 
     def __init__(self):
         super().__init__()
-        self.mass = 5.
-        self.max_force = 3.
+        self.mass = .5
+        self.max_force = 2.
         self.max_dist = 4.20
         self.max_speed = 4.20
 
     def f(self, x, u):
         x, xdot = jnp.split(x, 2, -1)
-        u = jnp.clip(u, -self.max_force, self.max_force)
+        # u = jnp.clip(u, -self.max_force, self.max_force) # i think this is not helping
         xdotdot = u / self.mass
         return jnp.hstack([xdot, xdotdot])
 
     def g(self, x, u):
         Q = jnp.array([[1., 0.], [0., .1]])
-        R = jnp.array([[.005]])
+        R = jnp.array([[.05]])
         x = jnp.expand_dims(x, -1)
         u = jnp.expand_dims(u, -1)
         cost = x.T @ Q @ x + u.T @ R @ u
