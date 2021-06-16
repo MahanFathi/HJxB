@@ -40,7 +40,7 @@ class BaseAlgo(object):
         dummy_x = self.env.sample_state(1)
         dummy_features = self.env.obs2feat(dummy_x)
         self.vparams = self.value_net.nn.init(jax.random.PRNGKey(666), dummy_features)
-        self.optimizer = optim.Adam(learning_rate=self.cfg.VALUE_NET.LR).create(self.vparams)
+        self.optimizer = optim.GradientDescent(learning_rate=self.cfg.VALUE_NET.LR).create(self.vparams)
 
     def _make_u_star_solver(self, ):
         @jit
@@ -167,10 +167,15 @@ class BaseAlgo(object):
     def eval_policy(self, N: int):
         """ Evaluate policy inferred from J*
             amont N full rollouts.
-        """
 
+        .input:
+            N: if 1 call env.reset for deterministic eval
+        """
         cost_batch = jnp.zeros((N, ))
-        x_batch = self.env.sample_state(N)
+        if N is 1:
+            x_batch = jnp.expand_dims(self.env.reset(), 0)
+        else:
+            x_batch = self.env.sample_state(N)
 
         for t in range(self.env.timesteps):
             u_star_batch = self.get_optimal_u(x_batch)

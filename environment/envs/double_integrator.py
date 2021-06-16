@@ -16,7 +16,7 @@ class DoubleIntegratorSys(System):
     def __init__(self):
         super().__init__()
         self.mass = 5.
-        self.max_force = 2.
+        self.max_force = 3.
         self.max_dist = 4.20
         self.max_speed = 4.20
 
@@ -80,3 +80,8 @@ class DoubleIntegratorEnv(Env):
         if self.viewer:
             self.viewer.close()
             self.viewer = None
+
+    def reset(self):
+        # deterministic eval
+        self.state = jnp.array([2.5, 0.])
+        return self.state

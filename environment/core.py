@@ -151,7 +151,7 @@ class Env(gym.Env):
 
     # feel free to override this
     def reset(self):
-        self.state = jnp.squeeze(self.sample_state(1))
+        self.state = jnp.squeeze(self.sample_state(1), 0)
         return self.state
 
     def obs2feat(self, x: jnp.ndarray):
