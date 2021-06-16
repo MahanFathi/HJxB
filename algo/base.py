@@ -2,7 +2,7 @@ from environment import Env
 from network import ValueNet
 from utils import logger
 
-from flax import linen as nn, optim
+from flax import linen as nn, optim, serialization
 from yacs.config import CfgNode
 
 import jax
@@ -20,6 +20,7 @@ class BaseAlgo(object):
         self.cfg = cfg
         self.env = env
         self.sys = env.sys
+        self._dump_train_config()
         self._init_value_net_and_optimizer()
         self.u_star_solver_fn = self._make_u_star_solver()
         self.summary_writer = logger.get_summary_writer(cfg)
@@ -27,6 +28,12 @@ class BaseAlgo(object):
         self.dataset_size = cfg.TRAIN.DATASET_SIZE
         self.batch_size = cfg.TRAIN.BATCH_SIZE
         self.gamma = cfg.TRAIN.GAMMA
+
+    def _dump_train_config(self, ):
+        logdir = logger.get_logdir_path(self.cfg)
+        with open(logdir.joinpath("config.yaml"), "w") as f:
+            f.write(self.cfg.dump())
+        f.close()
 
     def _init_value_net_and_optimizer(self, ):
         self.value_net = ValueNet(self.cfg, self.env.obs2feat)
@@ -113,6 +120,10 @@ class BaseAlgo(object):
             self.optimizer = self.optimizer.apply_gradient(grad)
             loss_log.append(loss)
 
+        # update target network
+        if epoch % self.cfg.TRAIN.UPDATE_TARGET_NET_EVERY_N_EPOCHS == 0:
+            self.vparams = self.optimizer.target # update target net params
+
         # report to tb
         if epoch % self.cfg.LOG.LOG_EVERY_N_EPOCHS == 0:
             self.summary_writer.scalar(
@@ -133,8 +144,9 @@ class BaseAlgo(object):
             if self.cfg.LOG.ANIMATE:
                 self.animate()
 
-        if epoch % self.cfg.TRAIN.UPDATE_TARGET_NET_EVERY_N_EPOCHS == 0:
-            self.vparams = self.optimizer.target # update target net params
+        # save weights
+        if epoch % self.cfg.LOG.SAVE_WEIGHTS_EVERY_N_EPOCHS == 0:
+            self.save_params(str(epoch))
 
         print("Epoch value train loss: {}".format(np.mean(loss_log)))
 
@@ -168,6 +180,18 @@ class BaseAlgo(object):
 
         mean_cost = jnp.mean(cost_batch)
         return mean_cost
+
+    def save_params(self, name: str):
+        logdir = logger.get_logdir_path(self.cfg)
+        params_dir = logdir.joinpath("params")
+        params_dir.mkdir(exist_ok=True)
+        params_file = params_dir.joinpath("{}.flax".format(name))
+
+        param_bytes = serialization.to_bytes(self.optimizer.target)
+
+        with open(params_file, "wb") as f:
+            f.write(param_bytes)
+        f.close()
 
     def animate(self, ):
         self.env.reset()
