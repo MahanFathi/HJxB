@@ -15,10 +15,10 @@ class PendulumSys(System):
 
    def __init__(self, gravity=9.81):
       super().__init__()
-      self.max_speed = 2.
+      self.max_speed = 8.
       self.max_torque = 2.
       self.gravity = gravity
-      self.mass = 1.
+      self.mass = .5
       self.lenght = 1.
 
    def f(self, x, u):
@@ -28,13 +28,13 @@ class PendulumSys(System):
       m = self.mass
       l = self.lenght
 
-      u = jnp.clip(u, -self.max_torque, self.max_torque)[0]
+      # u = jnp.clip(u, -self.max_torque, self.max_torque)[0]
       thdotdot = (-3 * gravity / (2 * l) * jnp.sin(th + jnp.pi) + 3. / (m * l ** 2) * u)
       # clipped_thdot = jnp.clip(thdot, -self.max_speed, self.max_speed) # any good in doing this?
       return jnp.hstack([thdot, thdotdot])
 
    def g(self, x, u):
-      R = jnp.array([[.001]])
+      R = jnp.array([[1.]])
       th, thdot = jnp.split(x, 2, -1)
       cost = angle_normalize(th) ** 2 + .1 * thdot ** 2 + u.T @ R @ u
       return jnp.squeeze(cost)
@@ -91,5 +91,5 @@ class PendulumEnv(Env):
 
    def reset(self):
       # deterministic eval
-      self.state = jnp.array([0., 0.])
+      self.state = jnp.array([jnp.pi, 0.])
       return self.state
