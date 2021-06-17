@@ -1,6 +1,6 @@
 from environment import Env
 from network import ValueNet
-from utils import logger
+from utils import logger, gif
 
 from flax import linen as nn, optim, serialization
 from yacs.config import CfgNode
@@ -142,7 +142,7 @@ class BaseAlgo(object):
                 epoch,
             )
             if self.cfg.LOG.ANIMATE:
-                self.animate()
+                self.animate(epoch)
 
         # save weights
         if epoch % self.cfg.LOG.SAVE_WEIGHTS_EVERY_N_EPOCHS == 0:
@@ -207,12 +207,23 @@ class BaseAlgo(object):
         serialization.from_bytes(self.vparams, byte_params)
         serialization.from_bytes(self.optimizer.target, byte_params)
 
-    def animate(self, ):
+    def animate(self, name: str):
         """ Animate
         """
+        # get frames
+        frames = []
         self.env.reset()
         for _ in range(self.env.timesteps):
-            self.env.render()
+            frames.append(self.env.render(mode="rgb_array"))
             u = self.get_optimal_u(jnp.expand_dims(self.env.state, 0))
             self.env.step(jnp.squeeze(u, 0)) # take a random action
         # self.env.close()
+
+        # store
+        gifs_dir = logger.get_logdir_path(self.cfg).joinpath("gifs")
+        gifs_dir.mkdir(exist_ok=True)
+        gif.save_frames(
+            frames,
+            gifs_dir.joinpath("{}.gif".format(name)),
+            self.env.h,
+        )
