@@ -1,6 +1,7 @@
 from environment import Env
 from network import ValueNet
 from utils import logger, gif
+from .usolvers import make_usolver
 
 from flax import linen as nn, optim, serialization
 from yacs.config import CfgNode
@@ -22,12 +23,13 @@ class BaseAlgo(object):
         self.sys = env.sys
         self._dump_train_config()
         self._init_value_net_and_optimizer()
-        self.u_star_solver_fn = self._make_u_star_solver()
         self.summary_writer = logger.get_summary_writer(cfg)
 
         self.dataset_size = cfg.TRAIN.DATASET_SIZE
         self.batch_size = cfg.TRAIN.BATCH_SIZE
         self.gamma = cfg.TRAIN.GAMMA
+
+        self.usolver = make_usolver(cfg, env)
 
     def _dump_train_config(self, ):
         logdir = logger.get_logdir_path(self.cfg)
@@ -42,16 +44,6 @@ class BaseAlgo(object):
         self.vparams = self.value_net.nn.init(jax.random.PRNGKey(666), dummy_features)
         self.optimizer = optim.GradientDescent(learning_rate=self.cfg.VALUE_NET.LR).create(self.vparams)
 
-    def _make_u_star_solver(self, ):
-        @jit
-        @vmap
-        def u_star_solver_fn(R, f2, pjpx):
-            R_inv = jnp.linalg.inv(R)
-            u_star = - 0.5 * R_inv @ f2.T @ pjpx.T
-            return jnp.squeeze(u_star, axis=-1)
-
-        return u_star_solver_fn
-
     def get_optimal_u(self,
                       x_batch: jnp.ndarray,  # (N, obs_dim)
                       ):
@@ -63,10 +55,9 @@ class BaseAlgo(object):
         """
         # TODO(mahan): get rid of the need for dummy_u
         dummy_u = jnp.zeros((x_batch.shape[0], self.env.action_space.shape[0]))
-        R = 0.5 * self.sys.hess_g_u_fn(x_batch, dummy_u)
         f2 = self.sys.jac_f_fn(x_batch, dummy_u)[1]
         pjpx = self.value_net.pjpx_fn(x_batch, self.vparams)
-        u_star = self.u_star_solver_fn(R, f2, pjpx)
+        u_star = self.usolver.u_star_solver_fn(f2, pjpx)
         return u_star
 
     def get_target_j(self,

@@ -25,6 +25,7 @@ _C.VALUE_NET.LR = 1e-3
 # ---------------------------------------------------------------------------- #
 _C.TRAIN = CN()
 _C.TRAIN.ALGO_NAME = "DPcFVI"
+_C.TRAIN.USOLVER_NAME = "ConvConjSolver"
 _C.TRAIN.ITERATIONS = 256
 _C.TRAIN.DATASET_SIZE = 1024
 _C.TRAIN.BATCH_SIZE = 64

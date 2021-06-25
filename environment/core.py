@@ -22,12 +22,14 @@ class System(object):
         f_fn(x: (N, obs_dim), u: (N, act_dim)) -> (N, obs_dim)
         g_fn(x: (N, obs_dim), u: (N, act_dim)) -> (N, )
         jac_f_fn(x: (N, obs_dim), u: (N, act_dim)) -> (N, obs_dim, obs_dim), (N, obs_dim, act_dim)
+        grad_l2_fn(x: (obs_dim, ), u: (act_dim, )) -> (act_dim, )
         grad_g_fn(x: (N, obs_dim), u: (N, act_dim)) -> (N, obs_dim), (N, act_dim)
         hess_g_u_fn(x: (N, obs_dim), u: (N, act_dim)) -> (N, act_dim, act_dim)
         """
         self.f_fn = jit(vmap(self.f))
         self.g_fn = jit(vmap(self.g))
         self.jac_f_fn = self._make_jac_f_fn()
+        self.grad_l2_fn = self._make_grad_l2_fn()
         self.grad_g_fn = self._make_grad_g_fn()
         self.hess_g_u_fn = self._make_hess_g_u_fun()
 
@@ -63,6 +65,11 @@ class System(object):
         single_jac_f_fn = jax.jacfwd(self.f, argnums=[0, 1])
         batch_jac_f_fn = jit(vmap(single_jac_f_fn))
         return batch_jac_f_fn
+
+    def _make_grad_l2_fn(self, ):
+        """* no vmap'd"""
+        single_grad_l2_fn = jax.grad(self.g, argnums=1)
+        return jit(single_grad_l2_fn)
 
     def _make_grad_g_fn(self, ):
         single_grad_g_fn = jax.grad(self.g, argnums=[0, 1])
