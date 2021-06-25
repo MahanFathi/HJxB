@@ -34,9 +34,9 @@ class PendulumSys(System):
       return jnp.hstack([thdot, thdotdot])
 
    def g(self, x, u):
-      R = jnp.array([[1.]])
+      R = jnp.array([[.01]])
       th, thdot = jnp.split(x, 2, -1)
-      cost = angle_normalize(th) ** 2 + .1 * thdot ** 2 + u.T @ R @ u
+      cost = 10. * angle_normalize(th) ** 2 + thdot ** 2 + u.T @ R @ u
       return jnp.squeeze(cost)
 
 def angle_normalize(x):
