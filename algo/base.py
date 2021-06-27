@@ -163,7 +163,7 @@ class BaseAlgo(object):
             N: if 1 call env.reset for deterministic eval
         """
         cost_batch = jnp.zeros((N, ))
-        if N is 1:
+        if (N == 1):
             x_batch = jnp.expand_dims(self.env.reset(), 0)
         else:
             x_batch = self.env.sample_state(N)

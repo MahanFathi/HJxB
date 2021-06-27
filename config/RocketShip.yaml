@@ -1,0 +1,25 @@
+ENV:
+  ENV_NAME: RocketShipEnv
+  TIMESTEP: 0.05
+
+VALUE_NET:
+    LR: 0.003
+    FEATURES:
+        - 16
+        - 16
+        - 16
+        - 8
+TRAIN:
+  ALGO_NAME: DPcFVI
+  USOLVER_NAME: QuadraticSolver
+  ITERATIONS: 1000
+  DATASET_SIZE: 1024
+  BATCH_SIZE: 128
+  UPDATE_TARGET_NET_EVERY_N_EPOCHS: 1
+
+LOG:
+  LOG_DIR: ./logs
+  LOG_EVERY_N_EPOCHS: 10
+  EVAL_EVERY_N_EPOCHS: 150
+  EVAL_ACROSS_N_RUNS: 1 # for deterministic evaluation
+  ANIMATE: true

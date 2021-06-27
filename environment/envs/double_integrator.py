@@ -73,6 +73,7 @@ class DoubleIntegratorEnv(Env):
             brick.add_attr(self.transform)
             self.viewer.add_geom(brick)
             self.viewer.add_geom(dot)
+
         self.transform.set_translation(self.state[0], .0)
         return self.viewer.render(return_rgb_array=mode == 'rgb_array')
 
