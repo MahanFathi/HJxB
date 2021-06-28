@@ -57,7 +57,7 @@ class BaseAlgo(object):
         x_next_batch = self.env.step1_batch_fn(x_batch, u_star_batch)
         j_next_batch = self.value_net.apply(self.vparams, x_next_batch)
         g_batch = self.sys.g_fn(x_batch, u_star_batch) * self.env.h # TODO(mahan) a bit ugly
-        j_batch = g_batch + self.gamma * j_next_batch
+        j_batch = g_batch[:, None] + self.gamma * j_next_batch
         return j_batch
 
     def get_x_train(self, N=None):
