@@ -45,7 +45,7 @@ _C.USOLVER.USOLVER_NAME = "DiscreteSolver"
 #   USOLVER.DISCRETE
 # ---------------------------------------------------------------------------- #
 _C.USOLVER.DISCRETE = CN()
-_C.USOLVER.DISCRETE.GRID_POINTS = 1000 # could also be a list of length act_dim
+_C.USOLVER.DISCRETE.GRID_POINTS = 200 # could also be a list of length act_dim
 
 
 # ---------------------------------------------------------------------------- #

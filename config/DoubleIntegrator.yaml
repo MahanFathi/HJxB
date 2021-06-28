@@ -1,6 +1,6 @@
 ENV:
   ENV_NAME: DoubleIntegratorEnv
-  TIMESTEP: 0.05
+  TIMESTEP: 0.1
 
 VALUE_NET:
     LR: 0.001

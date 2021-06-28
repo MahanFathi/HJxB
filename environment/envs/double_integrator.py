@@ -28,7 +28,7 @@ class DoubleIntegratorSys(System):
 
     def g(self, x, u):
         Q = jnp.array([[1., 0.], [0., .1]])
-        R = jnp.array([[.05]])
+        R = jnp.array([[.001]])
         x = jnp.expand_dims(x, -1)
         u = jnp.expand_dims(u, -1)
         cost = x.T @ Q @ x + u.T @ R @ u
@@ -40,7 +40,7 @@ class DoubleIntegratorEnv(Env):
         super().__init__(
             DoubleIntegratorSys(), h=h,
         )
-        self.T = 3.
+        self.T = 6.
         self.action_space = gym.spaces.Box(
             low=-self.sys.max_force,
             high=self.sys.max_force,
