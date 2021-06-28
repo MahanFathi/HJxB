@@ -25,7 +25,6 @@ _C.VALUE_NET.LR = 1e-3
 # ---------------------------------------------------------------------------- #
 _C.TRAIN = CN()
 _C.TRAIN.ALGO_NAME = "DPcFVI"
-_C.TRAIN.USOLVER_NAME = "ConvConjSolver"
 _C.TRAIN.ITERATIONS = 256
 _C.TRAIN.DATASET_SIZE = 1024
 _C.TRAIN.BATCH_SIZE = 64
@@ -34,6 +33,20 @@ _C.TRAIN.BUFFER_SIZE = 8192
 _C.TRAIN.N_PARALLEL_ROLLOUTS = 32
 _C.TRAIN.GREEDY_EPSILON = 0.9 # act greedy 90% of the times
 _C.TRAIN.UPDATE_TARGET_NET_EVERY_N_EPOCHS = 1
+
+
+# ---------------------------------------------------------------------------- #
+# USOLVER
+# ---------------------------------------------------------------------------- #
+_C.USOLVER = CN()
+_C.USOLVER.USOLVER_NAME = "DiscreteSolver"
+
+# ---------------------------------------------------------------------------- #
+#   USOLVER.DISCRETE
+# ---------------------------------------------------------------------------- #
+_C.USOLVER.DISCRETE = CN()
+_C.USOLVER.DISCRETE.GRID_POINTS = 1000 # could also be a list of length act_dim
+
 
 # ---------------------------------------------------------------------------- #
 # LOGGING
