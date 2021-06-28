@@ -29,7 +29,7 @@ class BaseAlgo(object):
         self.batch_size = cfg.TRAIN.BATCH_SIZE
         self.gamma = cfg.TRAIN.GAMMA
 
-        self.usolver = make_usolver(cfg, env)
+        self.usolver = make_usolver(cfg, self)
 
     def _dump_train_config(self, ):
         logdir = logger.get_logdir_path(self.cfg)
@@ -44,22 +44,6 @@ class BaseAlgo(object):
         self.vparams = self.value_net.nn.init(jax.random.PRNGKey(666), dummy_features)
         self.optimizer = optim.GradientDescent(learning_rate=self.cfg.VALUE_NET.LR).create(self.vparams)
 
-    def get_optimal_u(self,
-                      x_batch: jnp.ndarray,  # (N, obs_dim)
-                      ):
-        """Returns the optimal action wrt J* at hand
-        .input:
-            x: (N, state_dim)
-        .output:
-            u_star: (N, act_dim)
-        """
-        # TODO(mahan): get rid of the need for dummy_u
-        dummy_u = jnp.zeros((x_batch.shape[0], self.env.action_space.shape[0]))
-        f2 = self.sys.jac_f_fn(x_batch, dummy_u)[1]
-        pjpx = self.value_net.pjpx_fn(x_batch, self.vparams)
-        u_star = self.usolver.u_star_solver_fn(f2, pjpx)
-        return u_star
-
     def get_target_j(self,
                      x_batch: jnp.ndarray,
                      ):
@@ -69,7 +53,7 @@ class BaseAlgo(object):
         .output:
             j: (N, 1)
         """
-        u_star_batch = self.get_optimal_u(x_batch)
+        u_star_batch = self.usolver.u_star_solver_fn(x_batch)
         x_next_batch = self.env.step1_batch_fn(x_batch, u_star_batch)
         j_next_batch = self.value_net.apply(self.vparams, x_next_batch)
         g_batch = self.sys.g_fn(x_batch, u_star_batch) * self.env.h # TODO(mahan) a bit ugly
@@ -169,7 +153,7 @@ class BaseAlgo(object):
             x_batch = self.env.sample_state(N)
 
         for t in range(self.env.timesteps):
-            u_star_batch = self.get_optimal_u(x_batch)
+            u_star_batch = self.usolver.u_star_solver_fn(x_batch)
             g_batch = self.sys.g_fn(x_batch, u_star_batch) * self.env.h
             cost_batch += g_batch
             x_batch = self.env.step1_batch_fn(x_batch, u_star_batch)
@@ -206,7 +190,7 @@ class BaseAlgo(object):
         self.env.reset()
         for _ in range(self.env.timesteps):
             frames.append(self.env.render(mode="rgb_array"))
-            u = self.get_optimal_u(jnp.expand_dims(self.env.state, 0))
+            u = self.usolver.u_star_solver_fn(jnp.expand_dims(self.env.state, 0))
             self.env.step(jnp.squeeze(u, 0)) # take a random action
         # self.env.close()
 

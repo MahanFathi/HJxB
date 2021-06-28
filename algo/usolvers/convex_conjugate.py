@@ -1,7 +1,5 @@
+import algo
 from .usolver import USolver
-from environment import Env
-
-from yacs.config import CfgNode
 
 from jax import numpy as jnp
 from jax.scipy.optimize import minimize
@@ -12,20 +10,21 @@ class ConvConjSolver(USolver):
     """ Generally solves for g(x, u) = l_1(x) + l_2(u)
     """
 
-    def __init__(self,
-                 cfg: CfgNode,
-                 env: Env,
-                 ):
-        super().__init__(cfg, env)
-
     def _make_solver(self, ):
-        self._grad_l2 = self.env.sys.grad_l2_fn
+        self._grad_l2 = self.sys.grad_l2_fn
 
-        def u_star_solver_fn(f2, pjpx):
+        def u_star_solver_fn(x_batch: jnp.ndarray):
             """
+            x_batch: (N, state_dim)
             f2: (N, state_dim, act_dim)
             pjpx: (N, 1, state_dim)
             """
+
+            batch_size = x_batch.shape[0]
+            dummy_u = jnp.zeros((batch_size, self.act_shape[0]))
+            f2 = self.sys.jac_f_fn(x_batch, dummy_u)[1] # assuming affine
+            pjpx = self.value_net.pjpx_fn(x_batch, self.algo.vparams)
+
             @jit
             @vmap
             def minimizer(f2, pjpx):
