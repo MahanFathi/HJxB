@@ -9,6 +9,10 @@ class DiscreteSolver(USolver):
     """ Solves for optimal u, via discrete bellman eq.
     """
 
+    def __init__(self, algo):
+        super().__init__(algo)
+        self._prepare_actions()
+
     def _prepare_actions(self, ):
         grid_points = self.cfg.USOLVER.DISCRETE.GRID_POINTS
 
@@ -33,39 +37,33 @@ class DiscreteSolver(USolver):
         self.actions = self.grid.reshape(-1, self.act_shape[0])
 
 
-    def _make_solver(self, ):
+    def solve(self, x_batch: jnp.ndarray):
+        """
+        x_batch: (N, state_dim)
+        f2: (N, state_dim, act_dim)
+        pjpx: (N, 1, state_dim)
+        R: (N, act_dim, act_dim)
+        """
 
-        self._prepare_actions()
+        gamma = self.cfg.TRAIN.GAMMA
+        N = self.actions.shape[0]
 
-        def u_star_solver_fn(x_batch: jnp.ndarray):
+        @jit
+        @vmap
+        def _u_star_solver_fn(x: jnp.array):
             """
-            x_batch: (N, state_dim)
-            f2: (N, state_dim, act_dim)
-            pjpx: (N, 1, state_dim)
-            R: (N, act_dim, act_dim)
-            """
+               .input:
+               x: (obs_dim, )
+               .output:
+               u_star: (act_dim, )
+               """
 
-            gamma = self.cfg.TRAIN.GAMMA
-            N = self.actions.shape[0]
+            x_repeated = jnp.repeat(x[None, :], N, axis=0)
+            x_next = self.sys.f_fn(x_repeated, self.actions)
+            j_next = self.value_net.apply(self.algo.vparams, x_next)
+            g = self.sys.g_fn(x_repeated, self.actions) * self.env.h
+            j = g[:, None] + gamma * j_next
+            min_index = jnp.argmin(j, axis=0)
+            return self.actions[min_index[0]]
 
-            @jit
-            @vmap
-            def _u_star_solver_fn(x: jnp.array):
-                """
-                .input:
-                x: (obs_dim, )
-                .output:
-                u_star: (act_dim, )
-                """
-
-                x_repeated = jnp.repeat(x[None, :], N, axis=0)
-                x_next = self.sys.f_fn(x_repeated, self.actions)
-                j_next = self.value_net.apply(self.algo.vparams, x_next)
-                g = self.sys.g_fn(x_repeated, self.actions) * self.env.h
-                j = g[:, None] + gamma * j_next
-                min_index = jnp.argmin(j, axis=0)
-                return self.actions[min_index[0]]
-
-            return _u_star_solver_fn(x_batch)
-
-        return u_star_solver_fn
+        return _u_star_solver_fn(x_batch)

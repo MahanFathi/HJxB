@@ -53,7 +53,7 @@ class BaseAlgo(object):
         .output:
             j: (N, 1)
         """
-        u_star_batch = self.usolver.u_star_solver_fn(x_batch)
+        u_star_batch = self.usolver.solve(x_batch)
         x_next_batch = self.env.step1_batch_fn(x_batch, u_star_batch)
         j_next_batch = self.value_net.apply(self.vparams, x_next_batch)
         g_batch = self.sys.g_fn(x_batch, u_star_batch) * self.env.h # TODO(mahan) a bit ugly
@@ -153,7 +153,7 @@ class BaseAlgo(object):
             x_batch = self.env.sample_state(N)
 
         for t in range(self.env.timesteps):
-            u_star_batch = self.usolver.u_star_solver_fn(x_batch)
+            u_star_batch = self.usolver.solve(x_batch)
             g_batch = self.sys.g_fn(x_batch, u_star_batch) * self.env.h
             cost_batch += g_batch
             x_batch = self.env.step1_batch_fn(x_batch, u_star_batch)
@@ -190,7 +190,7 @@ class BaseAlgo(object):
         self.env.reset()
         for _ in range(self.env.timesteps):
             frames.append(self.env.render(mode="rgb_array"))
-            u = self.usolver.u_star_solver_fn(jnp.expand_dims(self.env.state, 0))
+            u = self.usolver.solve(jnp.expand_dims(self.env.state, 0))
             self.env.step(jnp.squeeze(u, 0)) # take a random action
         # self.env.close()
 

@@ -10,39 +10,34 @@ class ConvConjSolver(USolver):
     """ Generally solves for g(x, u) = l_1(x) + l_2(u)
     """
 
-    def _make_solver(self, ):
-        self._grad_l2 = self.sys.grad_l2_fn
+    def solve(self, x_batch: jnp.ndarray):
+        """
+        x_batch: (N, state_dim)
+        f2: (N, state_dim, act_dim)
+        pjpx: (N, 1, state_dim)
+        """
 
-        def u_star_solver_fn(x_batch: jnp.ndarray):
+        batch_size = x_batch.shape[0]
+        dummy_u = jnp.zeros((batch_size, self.act_shape[0]))
+        f2 = self.sys.jac_f_fn(x_batch, dummy_u)[1] # assuming affine
+        pjpx = self.value_net.pjpx_fn(x_batch, self.algo.vparams)
+
+        @jit
+        @vmap
+        def minimizer(f2, pjpx):
             """
-            x_batch: (N, state_dim)
-            f2: (N, state_dim, act_dim)
-            pjpx: (N, 1, state_dim)
-            """
+               f2: (state_dim, act_dim)
+               pjpx: (1, state_dim)
+               """
+            min_f = lambda u: jnp.mean(jnp.square(
+                self.sys.grad_l2_fn(jnp.zeros(self.obs_shape), u) +
+                jnp.squeeze(pjpx @ f2, axis=0)
+            ))
+            results = minimize(
+                min_f,
+                jnp.zeros(self.act_shape),
+                method="BFGS",
+            )
+            return results.x
 
-            batch_size = x_batch.shape[0]
-            dummy_u = jnp.zeros((batch_size, self.act_shape[0]))
-            f2 = self.sys.jac_f_fn(x_batch, dummy_u)[1] # assuming affine
-            pjpx = self.value_net.pjpx_fn(x_batch, self.algo.vparams)
-
-            @jit
-            @vmap
-            def minimizer(f2, pjpx):
-                """
-                f2: (state_dim, act_dim)
-                pjpx: (1, state_dim)
-                """
-                min_f = lambda u: jnp.mean(jnp.square(
-                    self._grad_l2(jnp.zeros(self.obs_shape), u) +
-                    jnp.squeeze(pjpx @ f2, axis=0)
-                ))
-                results = minimize(
-                    min_f,
-                    jnp.zeros(self.act_shape),
-                    method="BFGS",
-                )
-                return results.x
-
-            return minimizer(f2, pjpx)
-
-        return u_star_solver_fn
+        return minimizer(f2, pjpx)
