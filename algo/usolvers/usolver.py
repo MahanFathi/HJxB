@@ -19,7 +19,7 @@ class USolver(object):
         self.obs_shape = self.env.observation_space.shape
         self.act_shape = self.env.action_space.shape
 
-    def u_star_solver(self, x_batch: jnp.ndarray):
+    def solve(self, x_batch: jnp.ndarray):
         """Returns the optimal action wrt J* at hand
         .input:
         x: (N, state_dim)
