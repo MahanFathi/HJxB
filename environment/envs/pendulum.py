@@ -28,9 +28,9 @@ class PendulumSys(System):
       m = self.mass
       l = self.lenght
 
-      # u = jnp.clip(u, -self.max_torque, self.max_torque)[0]
+      u = jnp.clip(u, -self.max_torque, self.max_torque)
       thdotdot = (-3 * gravity / (2 * l) * jnp.sin(th + jnp.pi) + 3. / (m * l ** 2) * u)
-      # clipped_thdot = jnp.clip(thdot, -self.max_speed, self.max_speed) # any good in doing this?
+      thdot = jnp.clip(thdot, -self.max_speed, self.max_speed) # any good in doing this?
       return jnp.hstack([thdot, thdotdot])
 
    def g(self, x, u):
@@ -48,7 +48,7 @@ class PendulumEnv(Env):
       super().__init__(
          PendulumSys(), h=h,
       )
-      self.T = 3.
+      self.T = 10.
       self.action_space = gym.spaces.Box(
          low=-self.sys.max_torque,
          high=self.sys.max_torque,
@@ -93,3 +93,9 @@ class PendulumEnv(Env):
       # deterministic eval
       self.state = jnp.array([jnp.pi, 0.])
       return self.state
+
+   def sample_state(self,
+                    N: int, # sample_size
+                    ):
+      init_state = jnp.array([jnp.pi, 0.])
+      return jnp.repeat(init_state[None, :], N, axis=0)

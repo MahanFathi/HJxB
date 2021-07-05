@@ -17,11 +17,14 @@ class RTDPcFVI(BaseAlgo):
                  ):
         super().__init__(cfg, env)
 
-        self.parallel_rollouts = cfg.TRAIN.N_PARALLEL_ROLLOUTS
+        self.n_parallel_rollouts = cfg.TRAIN.N_PARALLEL_ROLLOUTS
+        timesteps = int(self.env.T / self.env.h)
+        self.episode_length = cfg.TRAIN.DEPTH_ROLLOUTS or timesteps
+        self.collect_every_n_epochs = cfg.TRAIN.COLLECT_EVERY_N_EPOCHS
 
         self.replay_buffer = ReplayBuffer(
             size=cfg.TRAIN.BUFFER_SIZE,
-            batch_size=self.parallel_rollouts,
+            batch_size=self.n_parallel_rollouts,
             observation_space=env.observation_space,
         )
 
@@ -38,13 +41,15 @@ class RTDPcFVI(BaseAlgo):
         each training epoch.
         """
 
-        if self.epoch_counter % self.env.timesteps == 0:
-            self.x_prev = self.env.sample_state(self.parallel_rollouts)
+        # collect
+        if self.epoch_counter % self.collect_every_n_epochs == 0:
+            self.x_prev = self.env.sample_state(self.n_parallel_rollouts)
             self.replay_buffer.add(self.x_prev)
+            for _ in range(self.episode_length):
+                x = self._collect_1step(self.x_prev) # x is collected
+                self.x_prev = x
 
-        x = self._collect_1step(self.x_prev)
-        self.x_prev = x
-
+        # prepare 1st iter
         N = N or self.dataset_size
         assert self.replay_buffer.capacity >= N
         while N > self.replay_buffer.size:
@@ -53,6 +58,7 @@ class RTDPcFVI(BaseAlgo):
 
         self.epoch_counter += 1
 
+        # sample
         x_train = self.replay_buffer.sample(N)
         return x_train
 
@@ -65,7 +71,7 @@ class RTDPcFVI(BaseAlgo):
         """
         # act epsilon-greedy
         if random.random() < self.greedy_epsilon:
-            u_star_batch = self.get_optimal_u(x_batch)
+            u_star_batch = self.usolver.solve(x_batch)
         else:
             self.rng, input_rng = jax.random.split(self.rng)
             u_star_batch = jax.random.uniform(
