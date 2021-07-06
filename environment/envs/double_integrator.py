@@ -22,13 +22,14 @@ class DoubleIntegratorSys(System):
 
     def f(self, x, u):
         x, xdot = jnp.split(x, 2, -1)
-        # u = jnp.clip(u, -self.max_force, self.max_force) # i think this is not helping
+        u = jnp.clip(u, -self.max_force, self.max_force)
         xdotdot = u / self.mass
         return jnp.hstack([xdot, xdotdot])
 
     def g(self, x, u):
+        u = jnp.clip(u, -self.max_force, self.max_force)
         Q = jnp.array([[1., 0.], [0., .1]])
-        R = jnp.array([[.001]])
+        R = jnp.array([[.01]])
         x = jnp.expand_dims(x, -1)
         u = jnp.expand_dims(u, -1)
         cost = x.T @ Q @ x + u.T @ R @ u
