@@ -18,7 +18,7 @@ class PendulumSys(System):
       self.max_speed = 8.
       self.max_torque = 2.
       self.gravity = gravity
-      self.mass = .5
+      self.mass = 1.
       self.lenght = 1.
 
    def f(self, x, u):
@@ -34,6 +34,7 @@ class PendulumSys(System):
       return jnp.hstack([thdot, thdotdot])
 
    def g(self, x, u):
+      u = jnp.clip(u, -self.max_torque, self.max_torque)
       R = jnp.array([[.01]])
       th, thdot = jnp.split(x, 2, -1)
       cost = 10. * angle_normalize(th) ** 2 + thdot ** 2 + u.T @ R @ u
@@ -94,8 +95,8 @@ class PendulumEnv(Env):
       self.state = jnp.array([jnp.pi, 0.])
       return self.state
 
-   def sample_state(self,
-                    N: int, # sample_size
-                    ):
-      init_state = jnp.array([jnp.pi, 0.])
-      return jnp.repeat(init_state[None, :], N, axis=0)
+   # def sample_state(self,
+   #                  N: int, # sample_size
+   #                  ):
+   #    init_state = jnp.array([jnp.pi, 0.])
+   #    return jnp.repeat(init_state[None, :], N, axis=0)
