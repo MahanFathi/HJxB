@@ -11,6 +11,7 @@ from jax import numpy as jnp, jit, vmap
 import numpy as np
 
 from functools import partial
+import experiment_buddy
 
 
 class BaseAlgo(object):
@@ -23,7 +24,8 @@ class BaseAlgo(object):
         self.sys = env.sys
         self._dump_train_config()
         self._init_value_net_and_optimizer()
-        self.summary_writer = logger.get_summary_writer(cfg)
+        self.summary_writer = experiment_buddy.deploy(host=cfg.HOST)
+        # logger.get_summary_writer(cfg)
 
         self.dataset_size = cfg.TRAIN.DATASET_SIZE
         self.batch_size = cfg.TRAIN.BATCH_SIZE
@@ -101,7 +103,7 @@ class BaseAlgo(object):
 
         # report to tb
         if epoch % self.cfg.LOG.LOG_EVERY_N_EPOCHS == 0:
-            self.summary_writer.scalar(
+            self.summary_writer.add_scalar(
                 "train_loss",
                 np.mean(loss_log),
                 epoch,
@@ -111,7 +113,7 @@ class BaseAlgo(object):
         if epoch % self.cfg.LOG.EVAL_EVERY_N_EPOCHS == 0:
             mean_cost = self.eval_policy(self.cfg.LOG.EVAL_ACROSS_N_RUNS)
             print("Env eval cost: {}".format(mean_cost))
-            self.summary_writer.scalar(
+            self.summary_writer.add_scalar(
                 "eval_cost",
                 mean_cost,
                 epoch,
