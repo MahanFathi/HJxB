@@ -61,6 +61,9 @@ _C.LOG.EVAL_ACROSS_N_RUNS = 10
 _C.LOG.SAVE_WEIGHTS_EVERY_N_EPOCHS = 100
 _C.LOG.ANIMATE = False
 
+_C.HOST = "mila"  # use "mila" as host for the cluster
+_C.merge_from_file("./config/Pendulum.yaml")
+
 
 def get_cfg_defaults():
     """Get a yacs CfgNode object with default values for my_project."""
