@@ -1,4 +1,4 @@
-from .base import BaseAlgo
+from .base_bellman import BaseBellman
 from environment import Env
 from utils.buffer import ReplayBuffer
 
@@ -8,7 +8,7 @@ from yacs.config import CfgNode
 import random
 
 
-class RTDPcFVI(BaseAlgo):
+class RTDPcFVI(BaseBellman):
     """Continuous Fitted Value Iteration"""
 
     def __init__(self,

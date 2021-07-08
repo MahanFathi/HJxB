@@ -1,8 +1,8 @@
-import algo
 from .usolver import USolver
 
 from jax import numpy as jnp
 from jax import jit, vmap
+from flax.core.frozen_dict import FrozenDict
 
 
 class DiscreteSolver(USolver):
@@ -36,8 +36,7 @@ class DiscreteSolver(USolver):
         self.grid = jnp.moveaxis(self.grid, 0, -1)
         self.actions = self.grid.reshape(-1, self.act_shape[0])
 
-
-    def solve(self, x_batch: jnp.ndarray):
+    def solve(self, x_batch: jnp.ndarray, params: FrozenDict):
         """
         x_batch: (N, state_dim)
         f2: (N, state_dim, act_dim)

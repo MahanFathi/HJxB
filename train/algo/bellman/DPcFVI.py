@@ -1,4 +1,4 @@
-from .base import BaseAlgo
+from .base_bellman import BaseBellman
 from environment import Env
 
 import jax
@@ -6,7 +6,7 @@ from jax import jit, numpy as jnp
 from yacs.config import CfgNode
 
 
-class DPcFVI(BaseAlgo):
+class DPcFVI(BaseBellman):
     """Continuous Fitted Value Iteration"""
 
     def __init__(self,

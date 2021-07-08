@@ -3,12 +3,9 @@ import unittest
 import jax
 from jax import numpy as jnp, test_util
 
-import numpy as np
-import scipy as sp
-
 from config.defaults import get_cfg_defaults
 from environment import make_env
-from algo import make_algo
+from train import make_algo
 
 class TestDerivatives(unittest.TestCase):
 

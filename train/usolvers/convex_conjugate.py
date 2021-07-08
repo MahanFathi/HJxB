@@ -1,16 +1,16 @@
-import algo
 from .usolver import USolver
 
 from jax import numpy as jnp
 from jax.scipy.optimize import minimize
 from jax import jit, vmap
+from flax.core.frozen_dict import FrozenDict
 
 
 class ConvConjSolver(USolver):
     """ Generally solves for g(x, u) = l_1(x) + l_2(u)
     """
 
-    def solve(self, x_batch: jnp.ndarray):
+    def solve(self, x_batch: jnp.ndarray, params: FrozenDict):
         """
         x_batch: (N, state_dim)
         f2: (N, state_dim, act_dim)

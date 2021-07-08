@@ -1,5 +1,3 @@
-import algo
-from environment import Env
 from yacs.config import CfgNode
 
 from .convex_conjugate import ConvConjSolver
@@ -8,7 +6,7 @@ from .discrete import DiscreteSolver
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from algo import BaseAlgo
+    from train import BaseAlgo
 
 
 __all__ = ["QuadraticSolver", "ConvConjSolver", "DiscreteSolver"]

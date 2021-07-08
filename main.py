@@ -1,6 +1,6 @@
 from config.defaults import get_cfg_defaults
 from environment import make_env
-from algo import make_algo
+from train.algo import make_algo
 
 import argparse
 
