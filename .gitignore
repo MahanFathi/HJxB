@@ -139,3 +139,6 @@ cython_debug/
 
 # Logs dir
 logs/
+
+# Pycharm
+.idea/
