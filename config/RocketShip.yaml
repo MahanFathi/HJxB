@@ -3,20 +3,21 @@ ENV:
   TIMESTEP: 0.05
 
 VALUE_NET:
-    LR: 0.003
+    LR: 0.001
     FEATURES:
-        - 16
+        - 32
         - 16
         - 16
         - 8
 TRAIN:
   ALGO_NAME: DPcFVI
-  ITERATIONS: 1000
+  ITERATIONS: 10000
   DATASET_SIZE: 1024
   BATCH_SIZE: 128
-  UPDATE_TARGET_NET_EVERY_N_EPOCHS: 1
+  UPDATE_TARGET_NET_EVERY_N_EPOCHS: 2
 
 USOLVER:
+  # not an affine system so QuadraticSolver is not going to work
   USOLVER_NAME: DiscreteSolver
 
 LOG:
